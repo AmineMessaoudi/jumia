@@ -7,9 +7,9 @@ import requests
 from bs4 import BeautifulSoup
 
 basicConfig(format='%(levelname)s %(asctime)s: %(message)s ', datefmt='%d/%m/%Y %I:%M:%S', encoding="utf-8",
-            level=logging.ERROR)
+            level=logging.DEBUG)
 
-site_url = "http://www.jumia.com.tn/"
+site_url = "http://www.jumia.com.tn"
 
 
 def connect(url):
@@ -29,7 +29,7 @@ def search_product():
     nb = 0
     search = input("search : >>> ")
     if search:
-        url = site_url + "catalog/?q=" + "+".join(search.split())
+        url = site_url + "/catalog/?q=" + "+".join(search.split())
         info(f"search terms: {'+'.join(search.split())}")
         links = get_links(url)
         for link in links:
@@ -38,17 +38,20 @@ def search_product():
             if articles:
                 for article in articles:
                     try:
-                        name = article.find('h3', {'class':'name'}).text
-                        price = article.find('div', {'class':'prc'}).text
-                        old = article.find('div', {'class':'old'})
-                        discount = article.find('div', {'class':'bdg _dsct _sm'})
+                        name = article.find('h3', {'class': 'name'}).text
+                        price = article.find('div', {'class': 'prc'}).text
+                        old = article.find('div', {'class': 'old'})
+                        discount = article.find('div', {'class': 'bdg _dsct _sm'})
+                        href = article.find('a', {'class':'core'})
                         print('article \t: ', name)
                         print('price \t\t: ', price)
                         if old:
                             print('old price\t: ', old.text)
                             print('discount \t: ', discount.text)
-                        print('-'*50)
-                        nb+=1
+                        if href:
+                            print('href \t\t: ', site_url+href['href'])
+                        print('-' * 50)
+                        nb += 1
                     except Exception as e:
                         warning(str(e))
                         continue
