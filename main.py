@@ -1,17 +1,26 @@
 #! python3
 import logging
+import os
 import re
 import shelve
+import sys
 from logging import basicConfig, info, error, warning, debug
 
 import requests
 from bs4 import BeautifulSoup
 
 basicConfig(format='%(levelname)s %(asctime)s: %(message)s ', datefmt='%d/%m/%Y %I:%M:%S', encoding="utf-8",
-            level=logging.DEBUG)
-logging.disable()
+            level=logging.WARN)
+logging.disable(logging.WARN)
 
 site_url = "http://www.jumia.com.tn"
+
+
+def clear():
+    if sys.platform == 'win32':
+        os.system('cls')
+    else:
+        os.system('clear')
 
 
 def connect(url):
@@ -28,6 +37,7 @@ def connect(url):
 
 
 def search_product(s):
+    clear()
     results = []
     nb = 0
     if s:
@@ -42,25 +52,29 @@ def search_product(s):
                     res = []
                     try:
                         name = article.find('h3', {'class': 'name'}).text
+                        if name:
+                            res.append(name)
+                            print('article \t: ', name)
                         price = article.find('div', {'class': 'prc'}).text
-                        res.append(name)
-                        res.append(price)
+                        if price:
+                            res.append(price)
+                            print('price \t\t: ', price)
                         old = article.find('div', {'class': 'old'})
-                        discount = article.find('div', {'class': 'bdg _dsct _sm'})
-                        href = article.find('a', {'class': 'core'})
-                        print('article \t: ', name)
-                        print('price \t\t: ', price)
                         if old:
                             print('old price\t: ', old.text)
                             res.append(old.text)
+                        discount = article.find('div', {'class': 'bdg _dsct _sm'})
+                        if discount:
                             print('discount \t: ', discount.text)
                             res.append(discount.text)
+                        href = article.find('a', {'class': 'core'})
                         if href:
                             print('href \t\t: ', site_url + href['href'])
                             res.append(site_url + href['href'])
-                        print('-' * 50)
-                        nb += 1
-                        results.append(res)
+                        if name:
+                            print('-' * 50)
+                            nb += 1
+                            results.append(res)
                     except Exception as e:
                         warning(str(e))
                         continue
